@@ -1,5 +1,5 @@
 {
-  "name": "geoip",
+  "name": "@captemulation/geoip",
   "description": "GeoIP binding for node",
   "version": "0.6.4",
   "homepage": "http://github.com/kuno/GeoIP",
