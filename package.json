@@ -1,7 +1,7 @@
 {
-  "name": "@captemulation/geoip",
+  "name": "geoip",
   "description": "GeoIP binding for node",
-  "version": "0.6.4",
+  "version": "0.7.0",
   "homepage": "http://github.com/kuno/GeoIP",
   "author": "Guan 'kuno' Qing <neokuno at Gmail dot com>",
   "contributors": [
@@ -50,8 +50,8 @@
     "geolocation"
   ],
   "bugs": {
-    "mail": "neokuno@gmail.com",
-    "url": "http://github.com/kuno/GeoIP/issues"
+    "mail": "eyalfishler@gmail.com",
+    "url": "http://github.com/eyalfishler/GeoIP/issues"
   },
   "license": "LGPL-2.1",
   "main": "index.js",
