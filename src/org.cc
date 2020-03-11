@@ -27,8 +27,13 @@ void Org::Init(v8::Local<v8::Object> exports) {
 
   Nan::SetPrototypeMethod(tpl, "lookupSync", lookupSync);
 
-  constructor.Reset(tpl->GetFunction());
-  exports->Set(Nan::New("Org").ToLocalChecked(), tpl->GetFunction());;;
+
+  v8::Local<v8::Context> context = exports->CreationContext();
+  constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
+  exports->Set(context, Nan::New("Org").ToLocalChecked(), tpl->GetFunction(context).ToLocalChecked());
+
+ // constructor.Reset(tpl->GetFunction());
+ // exports->Set(Nan::New("Org").ToLocalChecked(), tpl->GetFunction());;;
 }
 
 NAN_METHOD(Org::New) {
@@ -36,9 +41,14 @@ NAN_METHOD(Org::New) {
 
   Org *o = new Org();
 
-  String::Utf8Value file_str(info[0]->ToString());
-  const char *file_cstr = ToCString(file_str);
-  bool cache_on = info[1]->ToBoolean()->Value();
+  //String::Utf8Value file_str(info[0]->ToString());
+  //const char *file_cstr = ToCString(file_str);
+  //bool cache_on = info[1]->ToBoolean()->Value();
+
+  v8::Local<v8::Context> context = info.GetIsolate()->GetCurrentContext();
+  const char * file_cstr = *Nan::Utf8String(info[0]->ToString(context).ToLocalChecked());
+  const bool  cache_on = info[1]->ToBoolean(info.GetIsolate())->Value();
+
 
   o->db = GeoIP_open(file_cstr, cache_on?GEOIP_MEMORY_CACHE:GEOIP_STANDARD);
 
@@ -70,6 +80,9 @@ NAN_METHOD(Org::lookupSync) {
   //NanCString(info[0], &bc, host_cstr, size);
   Org *o = ObjectWrap::Unwrap<Org>(info.This());
   //Nan::Utf8String host_cstr(info[0]->ToString());
+  //
+  //
+  
   static Nan::Utf8String *host_cstr = new Nan::Utf8String(info[0]);
 
   uint32_t ipnum = _GeoIP_lookupaddress(**host_cstr);

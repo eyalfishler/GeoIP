@@ -27,9 +27,12 @@ void NetSpeed::Init(v8::Local<v8::Object> exports) {
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
     Nan::SetPrototypeMethod(tpl, "lookupSync", lookupSync);
-
-    constructor.Reset(tpl->GetFunction());
-    exports->Set(Nan::New("NetSpeed").ToLocalChecked(), tpl->GetFunction());
+    v8::Local<v8::Context> context = exports->CreationContext();
+    constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
+    exports->Set(context, Nan::New("NetSpeed").ToLocalChecked(), tpl->GetFunction(context).ToLocalChecked());
+    
+    //constructor.Reset(tpl->GetFunction());
+    //exports->Set(Nan::New("NetSpeed").ToLocalChecked(), tpl->GetFunction());
 }
 
 NAN_METHOD(NetSpeed::New) {
@@ -37,9 +40,14 @@ NAN_METHOD(NetSpeed::New) {
 
     NetSpeed *n = new NetSpeed();
 
-    String::Utf8Value file_str(info[0]->ToString());
-    const char * file_cstr = ToCString(file_str);
-    bool cache_on = info[1]->ToBoolean()->Value();
+    //String::Utf8Value file_str(info[0]->ToString());
+    //const char * file_cstr = ToCString(file_str);
+    //bool cache_on = info[1]->ToBoolean()->Value();
+
+    v8::Local<v8::Context> context = info.GetIsolate()->GetCurrentContext();
+    const char * file_cstr = *Nan::Utf8String(info[0]->ToString(context).ToLocalChecked());
+     const bool  cache_on = info[1]->ToBoolean(info.GetIsolate())->Value();
+
 
     n->db = GeoIP_open(file_cstr, cache_on ? GEOIP_MEMORY_CACHE : GEOIP_STANDARD);
 

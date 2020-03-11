@@ -28,8 +28,10 @@ void Country::Init(v8::Local<v8::Object> exports) {
 
   Nan::SetPrototypeMethod(tpl, "lookupSync", lookupSync);
 
-  constructor.Reset(tpl->GetFunction());
-  exports->Set(Nan::New("Country").ToLocalChecked(), tpl->GetFunction());
+  v8::Local<v8::Context> context = exports->CreationContext();
+  constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
+ 
+  exports->Set(context, Nan::New("Country").ToLocalChecked(), tpl->GetFunction(context).ToLocalChecked());
 }
 
 NAN_METHOD(Country::New) {
@@ -37,9 +39,25 @@ NAN_METHOD(Country::New) {
 
   Country *c = new Country();
 
-  String::Utf8Value file_str(info[0]->ToString());
-  const char * file_cstr = ToCString(file_str);
-  bool cache_on = info[1]->ToBoolean()->Value();
+  //String::Utf8Value file_str(info[0]->ToString());
+
+  v8::Local<v8::Context> context = info.GetIsolate()->GetCurrentContext();
+
+
+  const char * file_cstr = *Nan::Utf8String(info[0]->ToString(context).ToLocalChecked());
+
+  const bool  cache_on = info[1]->ToBoolean(info.GetIsolate())->Value();
+
+  
+
+  //String::Utf8Value file_str(info.GetReturnValue().Set(Nan::New<String>(info[0]).ToLocalChecked()));
+
+
+
+
+  //const char * file_cstr = ToCString(file_str);
+
+  //bool cache_on = info[1]->ToBoolean()->Value();
 
   c->db = GeoIP_open(file_cstr, cache_on?GEOIP_MEMORY_CACHE:GEOIP_STANDARD);
 
@@ -60,6 +78,7 @@ NAN_METHOD(Country::New) {
 
 NAN_METHOD(Country::lookupSync) {
   Nan::HandleScope scope;
+   v8::Local<v8::Context> context = info.GetIsolate()->GetCurrentContext();
 
   Country *c = ObjectWrap::Unwrap<Country>(info.This());
 
@@ -79,10 +98,10 @@ NAN_METHOD(Country::lookupSync) {
     } else {
       char *name = _GeoIP_iso_8859_1__utf8(GeoIP_country_name[country_id]);
 
-      data->Set(Nan::New("country_name").ToLocalChecked(), Nan::New(name).ToLocalChecked());
-      data->Set(Nan::New("country_code").ToLocalChecked(), Nan::New(GeoIP_country_code[country_id]).ToLocalChecked());
-      data->Set(Nan::New("country_code3").ToLocalChecked(), Nan::New(GeoIP_country_code3[country_id]).ToLocalChecked());
-      data->Set(Nan::New("continent_code").ToLocalChecked(), Nan::New(GeoIP_country_continent[country_id]).ToLocalChecked());
+      data->Set(context,Nan::New("country_name").ToLocalChecked(), Nan::New(name).ToLocalChecked());
+      data->Set(context,Nan::New("country_code").ToLocalChecked(), Nan::New(GeoIP_country_code[country_id]).ToLocalChecked());
+      data->Set(context,Nan::New("country_code3").ToLocalChecked(), Nan::New(GeoIP_country_code3[country_id]).ToLocalChecked());
+      data->Set(context,Nan::New("continent_code").ToLocalChecked(), Nan::New(GeoIP_country_continent[country_id]).ToLocalChecked());
 
       free(name);
 

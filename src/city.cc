@@ -27,18 +27,25 @@ void City::Init(v8::Local<v8::Object> exports) {
 
   Nan::SetPrototypeMethod(tpl, "lookupSync", lookupSync);
 
-  constructor.Reset(tpl->GetFunction());
-  exports->Set(Nan::New("City").ToLocalChecked(), tpl->GetFunction());
+  v8::Local<v8::Context> context = exports->CreationContext();
+  constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
+  exports->Set(context,Nan::New("City").ToLocalChecked(), tpl->GetFunction(context).ToLocalChecked());
 }
 
 NAN_METHOD(City::New) {
   Nan::HandleScope scope;
 
   City *c = new City();
+  v8::Local<v8::Context> context = info.GetIsolate()->GetCurrentContext();
 
-  String::Utf8Value file_str(info[0]->ToString());
-  const char * file_cstr = ToCString(file_str);
-  bool cache_on = info[1]->ToBoolean()->Value();
+  //String::Utf8Value file_str(info[0]->ToString());
+  //const char * file_cstr = ToCString(file_str);
+  //bool cache_on = info[1]->ToBoolean()->Value();
+  const char * file_cstr = *Nan::Utf8String(info[0]->ToString(context).ToLocalChecked());
+  const bool  cache_on = info[1]->ToBoolean(info.GetIsolate())->Value();
+
+  //bool cache_on = true;
+  
 
   c->db = GeoIP_open(file_cstr, cache_on ? GEOIP_MEMORY_CACHE : GEOIP_STANDARD);
 
@@ -59,7 +66,7 @@ NAN_METHOD(City::New) {
 
 NAN_METHOD(City::lookupSync) {
   Nan::HandleScope scope;
-
+  v8::Local<v8::Context> context = info.GetIsolate()->GetCurrentContext();
   City *c = ObjectWrap::Unwrap<City>(info.This());
 
   Local<Object> data = Nan::New<Object>();
@@ -83,22 +90,22 @@ NAN_METHOD(City::lookupSync) {
   }
 
   if (record->country_code) {
-    data->Set(Nan::New<String>("country_code").ToLocalChecked(),
+    data->Set(context,Nan::New<String>("country_code").ToLocalChecked(),
       Nan::New<String>(record->country_code).ToLocalChecked());
   }
 
   if (record->country_code3) {
-    data->Set(Nan::New<String>("country_code3").ToLocalChecked(),
+    data->Set(context,Nan::New<String>("country_code3").ToLocalChecked(),
       Nan::New<String>(record->country_code3).ToLocalChecked());
   }
 
   if (record->country_name) {
-    data->Set(Nan::New<String>("country_name").ToLocalChecked(),
+    data->Set(context,Nan::New<String>("country_name").ToLocalChecked(),
       Nan::New<String>(record->country_name).ToLocalChecked());
   }
 
   if (record->region) {
-    data->Set(Nan::New<String>("region").ToLocalChecked(),
+    data->Set(context,Nan::New<String>("region").ToLocalChecked(),
       Nan::New<String>(record->region).ToLocalChecked());
   }
 
@@ -106,7 +113,7 @@ NAN_METHOD(City::lookupSync) {
     char *name = _GeoIP_iso_8859_1__utf8(record->city);
 
     if (name) {
-      data->Set(Nan::New<String>("city").ToLocalChecked(),
+      data->Set(context,Nan::New<String>("city").ToLocalChecked(),
         Nan::New<String>(name).ToLocalChecked());
     }
 
@@ -114,37 +121,37 @@ NAN_METHOD(City::lookupSync) {
   }
 
   if (record->postal_code) {
-    data->Set(Nan::New<String>("postal_code").ToLocalChecked(),
+    data->Set(context,Nan::New<String>("postal_code").ToLocalChecked(),
       Nan::New<String>(record->postal_code).ToLocalChecked());
   }
 
   if (record->latitude >= -90 && record->latitude <= 90) {
-    data->Set(Nan::New<String>("latitude").ToLocalChecked(),
+    data->Set(context,Nan::New<String>("latitude").ToLocalChecked(),
       Nan::New<Number>(record->latitude));;
   }
 
   if (record->longitude >= -180 && record->longitude <= 180) {
-    data->Set(Nan::New<String>("longitude").ToLocalChecked(),
+    data->Set(context,Nan::New<String>("longitude").ToLocalChecked(),
       Nan::New<Number>(record->longitude));
   }
 
   if (record->metro_code) {
-    data->Set(Nan::New<String>("metro_code").ToLocalChecked(),
+    data->Set(context,Nan::New<String>("metro_code").ToLocalChecked(),
       Nan::New<Number>(record->metro_code));;
   }
 
   if (record->dma_code) {
-    data->Set(Nan::New<String>("dma_code").ToLocalChecked(),
+    data->Set(context,Nan::New<String>("dma_code").ToLocalChecked(),
       Nan::New<Number>(record->dma_code));
   }
 
   if (record->area_code) {
-    data->Set(Nan::New<String>("area_code").ToLocalChecked(),
+    data->Set(context,Nan::New<String>("area_code").ToLocalChecked(),
       Nan::New<Number>(record->area_code));
   }
 
   if (record->continent_code) {
-    data->Set(Nan::New<String>("continent_code").ToLocalChecked(),
+    data->Set(context,Nan::New<String>("continent_code").ToLocalChecked(),
       Nan::New<String>(record->continent_code).ToLocalChecked());
   }
 
@@ -152,7 +159,7 @@ NAN_METHOD(City::lookupSync) {
     const char *time_zone = GeoIP_time_zone_by_country_and_region(record->country_code, record->region);
 
     if(time_zone) {
-      data->Set(Nan::New<String>("time_zone").ToLocalChecked(),
+      data->Set(context,Nan::New<String>("time_zone").ToLocalChecked(),
         Nan::New<String>(time_zone).ToLocalChecked());
     }
   }

@@ -31,15 +31,36 @@ extern "C" {
     Org::Init(exports);
 
     // Utility memeber method
+    
     v8::Local<FunctionTemplate> check = Nan::New<v8::FunctionTemplate>(utils::check);
     v8::Local<FunctionTemplate> isString = Nan::New<v8::FunctionTemplate>(utils::isString);
 
-    exports->Set(Nan::New("check").ToLocalChecked(),
+
+    
+   // exports->Set(Nan::New("check").ToLocalChecked(),    check->GetFunction(context).ToLocalChecked());
+
+
+
+    v8::Local<v8::Context> context = exports->CreationContext();
+
+
+    //exports->Set(context, Nan::New("add").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(Add)->GetFunction(context).ToLocalChecked());
+
+    exports->Set(context, Nan::New("check").ToLocalChecked(),check->GetFunction(context).ToLocalChecked());
+    exports->Set(context, Nan::New("isString").ToLocalChecked(),isString->GetFunction(context).ToLocalChecked());
+    exports->Set(context, Nan::New("libgeoip").ToLocalChecked(), Nan::New(GeoIP_lib_version()).ToLocalChecked());
+    
+    
+    //exports->Set(Nan::New("check").ToLocalChecked()  ,Nan::New<v8::FunctionTemplate>(utils::check)->GetFunction());
+
+   
+
+    /*exports->Set(Nan::New("check").ToLocalChecked(),
       check->GetFunction());
     exports->Set(Nan::New("isString").ToLocalChecked(),
       isString->GetFunction());
     exports->Set(Nan::New("libgeoip").ToLocalChecked(),
-        Nan::New(GeoIP_lib_version()).ToLocalChecked());
+        Nan::New(GeoIP_lib_version()).ToLocalChecked());*/
 
   }
 
